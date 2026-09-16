@@ -11,6 +11,7 @@ interface Medication {
   // campos do backend
   publicationDate: string | null; // atualização do bulário
   lastUpdate: string | null;       // inclusão na plataforma
+  bulas?: { nVersoes: number } | null; // versões arquivadas no buladiff
 }
 
 /* -------------------- CSV -------------------- */
@@ -27,6 +28,7 @@ export function exportAsCSV(
     "Nº Processo",
     "Data de Atualização",
     "Data de Inclusão",
+    "Versões Arquivadas",
   ];
 
   const rows = medications.map((m) => [
@@ -38,6 +40,7 @@ export function exportAsCSV(
     m.processNumber ?? "",
     m.publicationDate ?? "",
     m.lastUpdate ?? "",
+    m.bulas?.nVersoes ?? "",
   ]);
 
   const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
@@ -67,6 +70,7 @@ export function exportAsExcel(
     "Nº Processo",
     "Data de Atualização",
     "Data de Inclusão",
+    "Versões Arquivadas",
   ];
 
   const rows = medications.map((m) => [
@@ -78,6 +82,7 @@ export function exportAsExcel(
     m.processNumber ?? "",
     m.publicationDate ?? "",
     m.lastUpdate ?? "",
+    m.bulas?.nVersoes ?? "",
   ]);
 
   const tsv = [headers.join("\t"), ...rows.map((r) => r.join("\t"))].join("\n");

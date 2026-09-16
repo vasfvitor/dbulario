@@ -24,6 +24,8 @@ import {
 } from "@/lib/export";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { Link } from "wouter";
+import { produtoUrl } from "@/lib/bulas-format";
 
 /* === CONTRATO REAL COM O BACKEND === */
 interface Medication {
@@ -37,6 +39,8 @@ interface Medication {
   publicationDate: string | null; // atualização do bulário
   lastUpdate: string | null;       // inclusão na plataforma
   category?: string | null;
+  /** Presente quando o buladiff arquivou as versões desta bula. */
+  bulas: { nVersoes: number; ultimaPublicacao: string; ultimoDiff: string | null } | null;
 }
 
 function formatDate(value: string | null) {
@@ -207,6 +211,7 @@ export default function Medications() {
                       <th className="p-3 text-center">Atualização do bulário</th>
                       <th className="p-3 text-center">Inclusão na plataforma</th>
                       <th className="p-3 text-center">Consultas ANVISA</th>
+                      <th className="p-3 text-center">Versões</th>
 
                     </tr>
                   </thead>
@@ -233,8 +238,17 @@ export default function Medications() {
                         </Button>
                       </a>
                     </td>
-
-
+                        <td className="p-3 text-center">
+                          {m.bulas ? (
+                            <Link href={produtoUrl(m.registrationNumber)}>
+                              <Button size="sm" variant="outline" title={`${m.bulas.nVersoes} versões arquivadas`}>
+                                Ver versões ({m.bulas.nVersoes})
+                              </Button>
+                            </Link>
+                          ) : (
+                            <span className="text-muted-foreground" title="Histórico ainda não arquivado">-</span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

@@ -7,6 +7,7 @@ import {
   getMedicationById,
   getRecentUpdates,
 } from "../lib/csv-loader.js";
+import { getIndice, resumo } from "../lib/buladiff.js";
 
 export const medicationsRouter = router({
   /* -------------------- LISTAGEM PRINCIPAL -------------------- */
@@ -35,14 +36,23 @@ export const medicationsRouter = router({
         dateRange: z.number().int().min(0).max(180).optional(),
       })
     )
-    .query(({ input }) => {
-      return listMedications(input.page, input.limit, {
+    .query(async ({ input }) => {
+      const page = listMedications(input.page, input.limit, {
         search: input.search,
         numeroRegistro: input.numeroRegistro,
         razaoSocial: input.razaoSocial,
         cnpj: input.cnpj,
         dateRange: input.dateRange,
       });
+      // registros arquivados no buladiff ganham o resumo das versões; os demais, null
+      const indice = await getIndice();
+      return {
+        ...page,
+        items: page.items.map((m) => {
+          const p = indice.get(m.registrationNumber);
+          return { ...m, bulas: p ? resumo(p) : null };
+        }),
+      };
     }),
 
   /* -------------------- BUSCA RÁPIDA -------------------- */

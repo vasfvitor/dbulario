@@ -12,12 +12,14 @@ import About from "./pages/About";
 import FAQ from "./pages/FAQ";
 import Medications from "./pages/Medications";
 import Contact from "./pages/Contact";
+import Produto from "./pages/Produto";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/medicamentos" component={Medications} />
+      <Route path="/bulas/:registro" component={Produto} />
       <Route path="/sobre" component={About} />
       <Route path="/faq" component={FAQ} />
       <Route path="/contato" component={Contact} />

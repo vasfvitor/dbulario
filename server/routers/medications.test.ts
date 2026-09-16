@@ -1,6 +1,8 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
 import { appRouter } from "../routers";
 import type { TrpcContext } from "../_core/context";
+import { resetCache } from "../lib/buladiff";
+import type { Produto } from "../lib/buladiff-types";
 
 function createTestContext(): TrpcContext {
   return {
@@ -15,6 +17,13 @@ describe("medications router", () => {
   beforeAll(() => {
     caller = appRouter.createCaller(createTestContext());
   });
+
+  // sem rede nos testes: o buladiff responde vazio, salvo onde o teste diz o contrário
+  beforeEach(() => {
+    resetCache();
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response("[]", { status: 200 }))));
+  });
+  afterEach(() => vi.unstubAllGlobals());
 
   describe("list", () => {
     it("returns a page with the pagination envelope", async () => {
@@ -32,6 +41,37 @@ describe("medications router", () => {
       for (const item of result.items) {
         expect(item.name.toLowerCase()).toContain("dipirona");
       }
+    });
+
+    it("marks archived registrations with the buladiff summary", async () => {
+      const sample = (await caller.medications.list({ page: 1, limit: 2 })).items;
+      const arquivado: Produto = {
+        registro: sample[0].registrationNumber,
+        idProduto: sample[0].id,
+        nome: sample[0].name,
+        empresa: sample[0].holder,
+        cnpj: sample[0].cnpj,
+        principio_ativo: "",
+        classes: [],
+        categoria: "",
+        referencia: "",
+        apresentacoes: [],
+        ultima_publicacao: "2026-01-01",
+        n_versoes: 3,
+        diffs: ["a-b-vp", "a-b-vps"],
+      };
+      resetCache();
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => Promise.resolve(new Response(JSON.stringify([arquivado]), { status: 200 })))
+      );
+      const result = await caller.medications.list({ page: 1, limit: 2 });
+      expect(result.items[0].bulas).toEqual({
+        nVersoes: 3,
+        ultimaPublicacao: "2026-01-01",
+        ultimoDiff: "a-b-vps",
+      });
+      expect(result.items[1].bulas).toBeNull();
     });
 
     it("pages do not overlap", async () => {
@@ -82,5 +122,21 @@ describe("medications router", () => {
     it("returns null for an unknown id", async () => {
       expect(await caller.medications.getById({ idProduto: 1 })).toBeNull();
     });
+  });
+});
+
+describe("bulas router", () => {
+  const caller = appRouter.createCaller(createTestContext());
+
+  beforeEach(() => resetCache());
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("produto returns null when the registration is not archived", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response("[]", { status: 200 }))));
+    expect(await caller.bulas.produto({ registro: "100430911" })).toBeNull();
+  });
+
+  it("produto rejects a malformed registration", async () => {
+    await expect(caller.bulas.produto({ registro: "abc" })).rejects.toThrow();
   });
 });
