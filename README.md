@@ -56,7 +56,7 @@ O DBulário automatiza todo o fluxo:
   - Produto
   - Número de registro  
 - 🧠 Identificação de medicamentos de referência atualizados  
-- 📈 Histórico de alterações  
+- 📈 Histórico de versões de cada bula, com o que mudou seção por seção  
 - 🌐 Interface web para visualização  
 
 ---
@@ -83,10 +83,27 @@ O DBulário automatiza todo o fluxo:
 flowchart LR
 A["Bulário ANVISA"] --> B["Coleta automatizada"]
 B --> C["Tratamento de dados"]
-C --> D["Estruturação (CSV/DB)"]
+C --> D["Estruturação (CSV)"]
 D --> E["Aplicação de filtros"]
 E --> F["Interface Web / Insights"]
+A --> G["buladiff: PDFs de cada versão"]
+G --> H["Texto por seção + diff"]
+H --> F
 ```
+
+---
+
+## 🔍 Versões e diferenças entre bulas
+
+Para os registros acompanhados pelo [buladiff](https://github.com/vasfvitor/buladiff), a plataforma
+mostra a linha do tempo de versões de cada bula (paciente e profissional) e, entre duas versões
+consecutivas, o que mudou em cada seção da RDC 47/2009, palavra a palavra. O buladiff baixa o PDF de
+cada expediente, extrai o texto pela estrutura do documento e publica o resultado como JSON
+estático; o DBulário lê esses JSON (variável `VITE_BULADIFF_DATA_URL`, ver `.env.example`).
+
+Cobertura: o que foi publicado no Bulário desde o início da coleta diária, mais uma lista curada.
+Na tabela de medicamentos, o botão "Ver versões" aparece só nesses registros. Na dúvida, o PDF no
+Bulário da ANVISA é a fonte.
 
 ---
 
@@ -108,11 +125,14 @@ E --> F["Interface Web / Insights"]
 
 ## 🛠️ Stack
 
-- **Frontend:** Next.js / React  
-- **Backend:** Node.js  
-- **Data Processing:** Python (ETL / scraping)  
+- **Frontend:** React 19, Vite, wouter, Tailwind e shadcn/ui  
+- **Backend:** Express + tRPC (função serverless na Vercel)  
+- **Data Processing:** Python (ETL / scraping); versões e diffs pelo buladiff  
 - **Deploy:** Vercel  
-- **Armazenamento:** CSV / Banco de dados  
+- **Armazenamento:** CSV em `data/` (catálogo) e JSON estáticos do buladiff (versões e diffs)  
+
+Desenvolvimento: `pnpm install`, `pnpm dev` (http://localhost:3000), `pnpm check`, `pnpm test`,
+`pnpm build`.
 
 ---
 

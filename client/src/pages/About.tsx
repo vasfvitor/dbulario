@@ -102,7 +102,7 @@ export default function About() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex gap-2">
                   <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                  <span>Estruturação em banco de dados</span>
+                  <span>Estruturação em base consultável e exportável</span>
                 </li>
                 <li className="flex gap-2">
                   <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
@@ -114,6 +114,30 @@ export default function About() {
                 </li>
               </ul>
             </div>
+          </div>
+
+          <div className="bg-card p-8 rounded-lg border border-border mb-12">
+            <h3 className="text-xl font-semibold mb-4 text-foreground">Versões e diferenças entre bulas</h3>
+            <p className="text-muted-foreground mb-4">
+              Para os registros acompanhados, a plataforma guarda cada versão publicada da bula (paciente e
+              profissional) e mostra o que mudou entre duas versões consecutivas, seção por seção, palavra a
+              palavra. O texto é extraído do PDF oficial pela estrutura do documento; quando a empresa inclui a
+              tabela de histórico de alterações no PDF, as seções declaradas por ela aparecem destacadas.
+            </p>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li className="flex gap-2">
+                <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <span>Linha do tempo de versões por expediente</span>
+              </li>
+              <li className="flex gap-2">
+                <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <span>Diferenças por seção da RDC 47/2009, unificadas ou lado a lado</span>
+              </li>
+              <li className="flex gap-2">
+                <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <span>Cobertura: publicações desde o início da coleta diária, mais uma lista curada. O PDF no Bulário continua sendo a fonte.</span>
+              </li>
+            </ul>
           </div>
 
           <div className="bg-card p-8 rounded-lg border border-border">

@@ -39,7 +39,17 @@ export default function FAQ() {
   {
     question: "Quais critérios de busca e filtragem estão disponíveis?",
     answer:
-      "As consultas podem ser realizadas por nome do medicamento, número de registro e data de atualização, permitindo recortes técnicos e análises direcionadas conforme a necessidade do usuário.",
+      "As consultas podem ser realizadas por nome do medicamento, número de registro, titular, data de atualização e categoria regulatória (medicamentos de referência), permitindo recortes técnicos e análises direcionadas conforme a necessidade do usuário.",
+  },
+  {
+    question: "O que são as versões e as diferenças entre bulas?",
+    answer:
+      "Cada publicação de bula no Bulário Eletrônico é uma versão, identificada pelo expediente. Para os registros acompanhados, a plataforma guarda o texto de cada versão (bula do paciente e do profissional) e mostra o que mudou entre duas versões consecutivas, seção por seção, com o texto removido e o adicionado marcados. Quando o PDF traz a tabela de histórico de alterações da empresa, as seções declaradas por ela aparecem destacadas. O texto é extraído automaticamente do PDF oficial; em caso de dúvida, o PDF no Bulário da ANVISA é a fonte.",
+  },
+  {
+    question: "Por que nem todo medicamento tem o botão 'Ver versões'?",
+    answer:
+      "O histórico de versões cobre as bulas publicadas desde o início da coleta diária e uma lista curada de registros, e cresce todos os dias. Medicamentos sem publicação nesse período ainda não têm versões arquivadas; para esses, a plataforma mantém o link direto para a consulta na ANVISA. O filtro de medicamentos de referência usa a categoria regulatória obtida nessa mesma coleta e, por isso, também cobre só os registros arquivados.",
   },
   {
     question: "É possível implementar alertas e notificações de alterações regulatórias?",
