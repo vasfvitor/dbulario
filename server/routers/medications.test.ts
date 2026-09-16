@@ -74,6 +74,26 @@ describe("medications router", () => {
       expect(result.items[1].bulas).toBeNull();
     });
 
+    it("referencia keeps only registrations the buladiff marks as 'Novo'", async () => {
+      const sample = (await caller.medications.list({ page: 1, limit: 2 })).items;
+      const base = {
+        idProduto: 0, nome: "", empresa: "", cnpj: "", principio_ativo: "", classes: [],
+        referencia: "", apresentacoes: [], ultima_publicacao: "2026-01-01", n_versoes: 1, diffs: [],
+      };
+      const produtos: Produto[] = [
+        { ...base, registro: sample[0].registrationNumber, categoria: "Novo" },
+        { ...base, registro: sample[1].registrationNumber, categoria: "Genérico" },
+      ];
+      resetCache();
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => Promise.resolve(new Response(JSON.stringify(produtos), { status: 200 })))
+      );
+      const result = await caller.medications.list({ page: 1, limit: 10, referencia: true });
+      expect(result.total).toBe(1);
+      expect(result.items[0].registrationNumber).toBe(sample[0].registrationNumber);
+    });
+
     it("pages do not overlap", async () => {
       const page1 = await caller.medications.list({ page: 1, limit: 5 });
       const page2 = await caller.medications.list({ page: 2, limit: 5 });
@@ -138,6 +158,12 @@ describe("medications.list com o buladiff fora", () => {
     const result = await caller.medications.list({ page: 1, limit: 3 });
     expect(result.total).toBeGreaterThan(0);
     for (const item of result.items) expect(item.bulas).toBeNull();
+  });
+
+  it("o filtro de referência avisa em vez de devolver lista vazia", async () => {
+    await expect(caller.medications.list({ page: 1, limit: 3, referencia: true })).rejects.toMatchObject({
+      code: "SERVICE_UNAVAILABLE",
+    });
   });
 });
 

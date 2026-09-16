@@ -131,6 +131,8 @@ export function listMedications(
     category?: string;
     status?: string;
     dateRange?: number;
+    /** Só estes registros (por exemplo, os de referência segundo o buladiff). */
+    registros?: Set<string>;
   } = {}
 ) {
   const data = loadCSV();
@@ -173,6 +175,10 @@ export function listMedications(
 
   if (filters.status) {
     result = result.filter((m) => m.status === filters.status);
+  }
+
+  if (filters.registros) {
+    result = result.filter((m) => filters.registros!.has(m.registrationNumber));
   }
 
   if (filters.dateRange !== undefined) {

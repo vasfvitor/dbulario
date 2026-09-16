@@ -38,6 +38,7 @@ function formatDate(value: string | null) {
 export default function Medications() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDateRange, setSelectedDateRange] = useState<string>("todos");
+  const [onlyReferencia, setOnlyReferencia] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -47,6 +48,7 @@ export default function Medications() {
     limit: itemsPerPage,
     search: searchQuery || undefined,
     dateRange: selectedDateRange === "todos" ? undefined : parseInt(selectedDateRange),
+    referencia: onlyReferencia || undefined,
   });
 
   // Estatísticas para painel superior
@@ -61,6 +63,7 @@ export default function Medications() {
         const filtros = {
           search: searchQuery || undefined,
           dateRange: selectedDateRange === "todos" ? undefined : parseInt(selectedDateRange),
+          referencia: onlyReferencia || undefined,
         };
         const items: MedicationRow[] = [];
         let page = 1;
@@ -85,7 +88,7 @@ export default function Medications() {
         toast.error("Erro ao exportar");
       }
     },
-    [searchQuery, selectedDateRange, utils]
+    [searchQuery, selectedDateRange, onlyReferencia, utils]
   );
 
   const medications: MedicationRow[] = data?.items ?? [];
@@ -136,7 +139,7 @@ export default function Medications() {
       {/* BUSCA E FILTROS */}
       <section className="py-6 border-b">
         <div className="container space-y-4">
-          <div className="flex flex-col md:flex-row md:items-end md:gap-4">
+          <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-3 w-5 h-5" />
               <Input
@@ -169,15 +172,28 @@ export default function Medications() {
               </SelectContent>
             </Select>
 
-            <Select disabled>
-              <SelectTrigger className="w-56">
-                <SelectValue placeholder="Lista Medicamentos Referências (sob demanda)" />
+            <Select
+              value={onlyReferencia ? "referencia" : "todos"}
+              onValueChange={(v) => {
+                setOnlyReferencia(v === "referencia");
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-64" title="Categoria regulatória 'Novo' no detalhe da ANVISA; cobre só os registros com histórico arquivado">
+                <SelectValue placeholder="Categoria" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="medref">Medicamento Referência</SelectItem>
+                <SelectItem value="todos">Todas as categorias</SelectItem>
+                <SelectItem value="referencia">Só medicamentos de referência</SelectItem>
               </SelectContent>
             </Select>
           </div>
+          {onlyReferencia && (
+            <p className="text-sm text-muted-foreground">
+              O filtro usa a categoria regulatória do detalhe da ANVISA, coletada pelo buladiff. Por enquanto só
+              cobre os registros com histórico de versões arquivado.
+            </p>
+          )}
         </div>
       </section>
 

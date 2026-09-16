@@ -2,8 +2,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2, Database, Zap } from "lucide-react";
 import { Link } from "wouter";
 import MainLayout from "@/components/MainLayout";
+import SecaoChips from "@/components/bulas/SecaoChips";
+import LegendaDeclarada from "@/components/bulas/LegendaDeclarada";
+import { trpc } from "@/lib/trpc";
+import { dataBR, diffUrl, TIPO_CURTO } from "@/lib/bulas-format";
 
 export default function Home() {
+  const { data: recentes } = trpc.bulas.recentes.useQuery();
   return (
     <MainLayout>
       {/* Hero Section */}
@@ -100,6 +105,30 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Alterações recentes nas bulas (buladiff) */}
+      {recentes && recentes.length > 0 && (
+        <section className="w-full py-16 bg-card border-y">
+          <div className="container">
+            <h2 className="text-3xl font-bold mb-2 text-foreground">Alterações recentes nas bulas</h2>
+            <p className="text-muted-foreground mb-6">
+              Seções que mudaram entre a versão anterior e a nova; <LegendaDeclarada />
+            </p>
+            <ul className="divide-y border rounded-lg bg-background">
+              {recentes.slice(0, 12).map((r) => (
+                <li key={r.slug + r.registro} className="p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                  <span className="text-sm text-muted-foreground w-24 shrink-0">{dataBR(r.para_data)}</span>
+                  <span className="flex-1 min-w-0">
+                    <Link href={diffUrl(r.registro, r.slug)} className="font-medium">{r.nome}</Link>
+                    <span className="text-muted-foreground text-sm"> · {r.empresa} · {TIPO_CURTO[r.tipo]}</span>
+                  </span>
+                  <SecaoChips tipo={r.tipo} secoes={r.alteradas} declaradas={r.declarado} href={diffUrl(r.registro, r.slug)} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="w-full py-16 md:py-24 bg-primary text-primary-foreground">

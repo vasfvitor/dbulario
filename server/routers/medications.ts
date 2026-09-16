@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { publicProcedure, router } from "../_core/trpc.js";
 import {
   listMedications,
@@ -34,18 +35,36 @@ export const medicationsRouter = router({
          * baseado em `data` (data de atualização)
          */
         dateRange: z.number().int().min(0).max(180).optional(),
+
+        /**
+         * Só medicamentos de referência (categoria regulatória "Novo" no detalhe da ANVISA).
+         * A categoria vem do buladiff, então cobre só os registros arquivados lá.
+         */
+        referencia: z.boolean().optional(),
       })
     )
     .query(async ({ input }) => {
+      const indice = await getIndice();
+      if (input.referencia && !indice) {
+        throw new TRPCError({
+          code: "SERVICE_UNAVAILABLE",
+          message:
+            "O filtro de medicamentos de referência depende dos dados do buladiff, indisponíveis agora. Tente de novo em instantes.",
+        });
+      }
+      const referencia =
+        input.referencia && indice
+          ? new Set(Array.from(indice.values()).filter((p) => p.categoria === "Novo").map((p) => p.registro))
+        : undefined;
       const page = listMedications(input.page, input.limit, {
         search: input.search,
         numeroRegistro: input.numeroRegistro,
         razaoSocial: input.razaoSocial,
         cnpj: input.cnpj,
         dateRange: input.dateRange,
+        registros: referencia,
       });
       // registros arquivados no buladiff ganham o resumo das versões; os demais, null
-      const indice = await getIndice();
       return {
         ...page,
         items: page.items.map((m) => {
