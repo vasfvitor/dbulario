@@ -233,3 +233,38 @@ html {
     min-width: 44px;
   }
 }
+
+/* ---------- Diff de bulas (port do buladiff) ---------- */
+:root {
+  --del-bg: #fde8e8;
+  --del-fg: #8a1c1c;
+  --ins-bg: #e3f5e6;
+  --ins-fg: #14532d;
+  --target-bg: #e3eef2;
+}
+.dark {
+  --del-bg: #4a1d1d;
+  --del-fg: #ffb4b4;
+  --ins-bg: #173a24;
+  --ins-fg: #a7e3b8;
+  --target-bg: #1e2f36;
+}
+/* texto do diff e legenda usam as mesmas cores */
+del { background: var(--del-bg); color: var(--del-fg); }
+ins { background: var(--ins-bg); color: var(--ins-fg); text-decoration: none; }
+.diff del { text-decoration: line-through; text-decoration-thickness: 1px; padding: 0 0.1em; }
+.diff ins { padding: 0 0.1em; }
+.diff .pbr { display: block; height: 0.7em; }
+.diff h3[id] { scroll-margin-top: 5rem; padding-left: 0.5rem; margin-left: -0.5rem; border-radius: 0.3rem; }
+/* "você está aqui": cor própria (não a âmbar de "declarada") e sem mudar a geometria */
+.diff h3:target { background: var(--target-bg); box-shadow: inset 3px 0 0 var(--primary); }
+.diff .texto { max-width: 78ch; overflow-wrap: anywhere; }
+.diff .texto.lado { max-width: none; }
+.diff .split { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35em 1rem; }
+.diff .split > div { padding: 0.1em 0.5em; border-left: 3px solid var(--border); }
+.diff .split > .old:has(del) { border-left-color: var(--del-fg); }
+.diff .split > .new:has(ins) { border-left-color: var(--ins-fg); }
+.diff .split > .vazio { background: var(--muted); border-left-color: transparent; opacity: 0.4; }
+.diff .omit { display: inline-block; margin: 0 0.3em; padding: 0 0.5em; color: var(--muted-foreground); background: var(--card); border: 1px solid var(--border); border-radius: 0.3rem; font-size: 0.85em; white-space: nowrap; }
+.diff .trecho summary { width: fit-content; margin: 0.25rem 0 0.5rem; }
+.diff .trecho:has(details[open]) .contexto { display: none; }

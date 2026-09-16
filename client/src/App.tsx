@@ -13,6 +13,7 @@ import FAQ from "./pages/FAQ";
 import Medications from "./pages/Medications";
 import Contact from "./pages/Contact";
 import Produto from "./pages/Produto";
+import Diff from "./pages/Diff";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/medicamentos" component={Medications} />
       <Route path="/bulas/:registro" component={Produto} />
+      <Route path="/bulas/:registro/:slug" component={Diff} />
       <Route path="/sobre" component={About} />
       <Route path="/faq" component={FAQ} />
       <Route path="/contato" component={Contact} />
