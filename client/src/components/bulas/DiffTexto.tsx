@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { Fragment, useMemo } from "react";
 import { ladoALado } from "@/lib/lado-a-lado";
 
 interface Props {
@@ -15,10 +15,10 @@ export default function DiffTexto({ html, lado, className = "" }: Props) {
     <div className={`texto lado ${className}`}>
       <div className="split">
         {pares.map((p, i) => (
-          <>
-            <div key={`o${i}`} className={`old${p.oldVazio ? " vazio" : ""}`} dangerouslySetInnerHTML={{ __html: p.old }} />
-            <div key={`n${i}`} className={`new${p.newVazio ? " vazio" : ""}`} dangerouslySetInnerHTML={{ __html: p.new }} />
-          </>
+          <Fragment key={i}>
+            <div className={`old${p.oldVazio ? " vazio" : ""}`} dangerouslySetInnerHTML={{ __html: p.old }} />
+            <div className={`new${p.newVazio ? " vazio" : ""}`} dangerouslySetInnerHTML={{ __html: p.new }} />
+          </Fragment>
         ))}
       </div>
     </div>

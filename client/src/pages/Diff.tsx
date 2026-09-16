@@ -35,6 +35,17 @@ function useEstreito(): boolean {
   return estreito;
 }
 
+/** Seção completa sob demanda: só entra no DOM quando o usuário abre (a página tem MBs de HTML). */
+function SecaoCompleta({ html, lado }: { html: string; lado: boolean }) {
+  const [aberta, setAberta] = useState(false);
+  return (
+    <details onToggle={(e) => setAberta((e.currentTarget as HTMLDetailsElement).open)}>
+      <summary className="text-sm text-muted-foreground cursor-pointer">ver a seção completa</summary>
+      {aberta && <DiffTexto html={html} lado={lado} />}
+    </details>
+  );
+}
+
 function TituloApresentacao({ doc }: { doc: DocumentoDiff }) {
   return (
     <h3 className="doc-title text-lg font-semibold mt-8 pb-1 border-b-2">
@@ -50,10 +61,18 @@ export default function Diff() {
   const estreito = useEstreito();
   const lado = modoLado && !estreito; // em telas estreitas fica sempre unificado
 
-  // âncora (#sec-vps-4) só existe depois que o HTML carrega
+  // âncora (#sec-vps-4) só existe depois que o HTML carrega; espera o layout da página assentar
   useEffect(() => {
     if (!data || !window.location.hash) return;
-    document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
+    const id = window.location.hash.slice(1);
+    const rolar = () => document.getElementById(id)?.scrollIntoView();
+    // duas tentativas: logo após o commit e depois que fontes e layout da página assentam
+    const t1 = setTimeout(rolar, 50);
+    const t2 = setTimeout(rolar, 600);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [data]);
 
   function alternar() {
@@ -156,10 +175,7 @@ export default function Diff() {
                   {s.contexto ? (
                     <div className="trecho">
                       <DiffTexto html={s.contexto} lado={lado} className="contexto" />
-                      <details>
-                        <summary className="text-sm text-muted-foreground cursor-pointer">ver a seção completa</summary>
-                        <DiffTexto html={s.html} lado={lado} />
-                      </details>
+                      <SecaoCompleta html={s.html} lado={lado} />
                     </div>
                   ) : (
                     <DiffTexto html={s.html} lado={lado} />
