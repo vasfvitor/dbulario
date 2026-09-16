@@ -125,6 +125,22 @@ describe("medications router", () => {
   });
 });
 
+describe("medications.list com o buladiff fora", () => {
+  const caller = appRouter.createCaller(createTestContext());
+
+  beforeEach(() => {
+    resetCache();
+    vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("rede"))));
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("a listagem continua, sem resumo de bulas", async () => {
+    const result = await caller.medications.list({ page: 1, limit: 3 });
+    expect(result.total).toBeGreaterThan(0);
+    for (const item of result.items) expect(item.bulas).toBeNull();
+  });
+});
+
 describe("bulas router", () => {
   const caller = appRouter.createCaller(createTestContext());
 

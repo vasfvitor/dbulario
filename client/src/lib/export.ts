@@ -1,18 +1,10 @@
 // client/src/lib/export.ts
+import type { MedicationRow } from "./trpc";
 
-interface Medication {
-  id: number;
-  name: string;
-  registrationNumber: string;
-  holder: string | null;
-  cnpj: string | null;
-  processNumber: string | null;
-
-  // campos do backend
-  publicationDate: string | null; // atualização do bulário
-  lastUpdate: string | null;       // inclusão na plataforma
-  bulas?: { nVersoes: number } | null; // versões arquivadas no buladiff
-}
+type Medication = Pick<
+  MedicationRow,
+  "id" | "name" | "registrationNumber" | "holder" | "cnpj" | "processNumber" | "publicationDate" | "lastUpdate" | "bulas"
+>;
 
 /* -------------------- CSV -------------------- */
 export function exportAsCSV(

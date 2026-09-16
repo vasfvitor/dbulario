@@ -2,6 +2,13 @@
 // https://vasfvitor.github.io/buladiff/data/. Cópia fiel de site/src/lib/data.ts do buladiff;
 // o servidor lê produtos.json e recentes.json, o navegador lê produtos/<registro>.json.
 
+/** Base dos JSON; `VITE_BULADIFF_DATA_URL` sobrepõe (servidor e navegador). */
+export const DEFAULT_DATA_URL = "https://vasfvitor.github.io/buladiff/data";
+
+export function normalizeDataUrl(url: string | undefined): string {
+  return (url || DEFAULT_DATA_URL).replace(/\/+$/, "");
+}
+
 export interface Produto {
   registro: string;
   idProduto: number;

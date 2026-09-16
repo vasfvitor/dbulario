@@ -6,7 +6,11 @@ import superjson from "superjson";
 import App from "./App";
 import "./index.css";
 
-const queryClient = new QueryClient();
+// o servidor guarda os índices do buladiff por 1 h e o CSV até o próximo deploy: refazer a mesma
+// consulta a cada foco de janela ou volta à página só acordaria a função serverless à toa
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 60 * 60 * 1000 } },
+});
 
 queryClient.getQueryCache().subscribe((event) => {
   if (event.type === "updated" && event.action.type === "error") {

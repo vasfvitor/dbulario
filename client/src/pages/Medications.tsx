@@ -23,25 +23,10 @@ import {
   getExportFilename,
 } from "@/lib/export";
 import { toast } from "sonner";
-import { trpc } from "@/lib/trpc";
+import { trpc, type MedicationRow } from "@/lib/trpc";
 import { Link } from "wouter";
 import { produtoUrl } from "@/lib/bulas-format";
 
-/* === CONTRATO REAL COM O BACKEND === */
-interface Medication {
-  id: number;
-  name: string;
-  registrationNumber: string;
-  holder: string | null;
-  cnpj: string | null;
-  processNumber: string | null;
-
-  publicationDate: string | null; // atualização do bulário
-  lastUpdate: string | null;       // inclusão na plataforma
-  category?: string | null;
-  /** Presente quando o buladiff arquivou as versões desta bula. */
-  bulas: { nVersoes: number; ultimaPublicacao: string; ultimoDiff: string | null } | null;
-}
 
 function formatDate(value: string | null) {
   if (!value) return "-";
@@ -72,21 +57,29 @@ export default function Medications() {
   const handleExport = useCallback(
     async (format: "excel" | "csv" | "json") => {
       try {
-        const allData = await utils.medications.list.fetch({
-          page: 1,
-          limit: 10000,
+        // a API limita a 100 por página: percorre todas as páginas do filtro atual
+        const filtros = {
           search: searchQuery || undefined,
           dateRange: selectedDateRange === "todos" ? undefined : parseInt(selectedDateRange),
-        });
+        };
+        const items: MedicationRow[] = [];
+        let page = 1;
+        let totalPages = 1;
+        do {
+          const res = await utils.medications.list.fetch({ ...filtros, page, limit: 100 });
+          items.push(...res.items);
+          totalPages = res.totalPages;
+          page++;
+        } while (page <= totalPages);
 
         const filename = getExportFilename(format);
 
-        if (format === "csv") exportAsCSV(allData.items, filename);
-        if (format === "json") exportAsJSON(allData.items, filename);
-        if (format === "excel") exportAsExcel(allData.items, filename);
+        if (format === "csv") exportAsCSV(items, filename);
+        if (format === "json") exportAsJSON(items, filename);
+        if (format === "excel") exportAsExcel(items, filename);
 
         toast.success("Exportação concluída", {
-          description: `${allData.items.length} registros exportados`,
+          description: `${items.length} registros exportados`,
         });
       } catch {
         toast.error("Erro ao exportar");
@@ -95,9 +88,8 @@ export default function Medications() {
     [searchQuery, selectedDateRange, utils]
   );
 
-  const medications: Medication[] = data?.items ?? [];
-  const total = data?.total ?? 0;
-  const totalPages = Math.ceil(total / itemsPerPage);
+  const medications: MedicationRow[] = data?.items ?? [];
+  const totalPages = data?.totalPages ?? 1;
 
   return (
     <MainLayout>
@@ -270,7 +262,7 @@ export default function Medications() {
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={currentPage === totalPages}
+                    disabled={currentPage >= totalPages}
                     onClick={() => setCurrentPage((p) => p + 1)}
                   >
                     <ChevronRight />

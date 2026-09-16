@@ -49,7 +49,7 @@ export const medicationsRouter = router({
       return {
         ...page,
         items: page.items.map((m) => {
-          const p = indice.get(m.registrationNumber);
+          const p = indice?.get(m.registrationNumber);
           return { ...m, bulas: p ? resumo(p) : null };
         }),
       };
